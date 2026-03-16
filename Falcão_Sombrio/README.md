@@ -254,18 +254,19 @@ Para a implementação do sistema proposto, algumas **tecnologias podem ser cons
 
 O projeto será organizado no **GitHub** da seguinte forma:
 
-Falcao-Sombrio
-│
-├── docs
-│ └── proposta_projeto.pdf
-│
-├── diagramas
-│ └── diagramas UML
-│
-├── banco
-│ └── modelo de dados
-│
-└── README.md
+Falcao-Sombrio  
+│  
+├── docs  
+│   └── proposta_projeto.pdf  
+│  
+├── diagramas  
+│   └── diagramas UML  
+│  
+├── banco  
+│   └── modelo de dados  
+│  
+└── README.md  
+
 
 ### **Repositório GitHub**
 
