@@ -4,48 +4,62 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CentralDeControle {
-    
-	// Atributos Privados
-    private List<Drone> frota;
-    private List<Missao> missoes;
-    private List<LogAuditoria> logs;
-    private SistemaComunicacao comunicacao;
-    private NavegacaoInteligente ia;
-    
-    // Construtor
-    private CentralDeControle() {
+
+    // Atributos
+    private final List<Drone> frota;
+    private final List<Missao> missoes;
+    private final List<LogAuditoria> logs;
+
+    // Construtor Público
+    public CentralDeControle() {
         this.frota = new ArrayList<>();
         this.missoes = new ArrayList<>();
         this.logs = new ArrayList<>();
-        this.comunicacao = new SistemaComunicacao("gRPC - Seguro");
-        this.ia = new NavegacaoInteligente();
+    }
+    
+    // Gerencia a Autorização da Missão
+    public void autorizarMissao(Operador operador, Missao missao) {
+
+        if (operador == null || missao == null) {
+            throw new IllegalArgumentException("Operador ou missão inválidos");
+        }
+ 
+        operador.autorizarInicioMissao(missao);    
+        missao.iniciarMissao();   
     }
 
-   
-    public void autorizarMissao(Operador operador, Missao missao, Drone drone) {
-        registrarLog(operador.getNome(), "INICIO_MISSAO", "Missão " + missao.getObjetivo() + " iniciada com o drone " + drone.getModelo());
+    public void adicionarDroneAFrota(Drone drone) {
+        if (drone == null) {
+            throw new IllegalArgumentException("Drone inválido");
+        }
+        this.frota.add(drone);
     }
 
+    public void adicionarMissao(Missao missao) {
+        if (missao == null) {
+            throw new IllegalArgumentException("Missão inválida");
+        }
+        this.missoes.add(missao);
+    }
 
+    
+    // Monitoramento de Drone Simplificado
     public void monitorarDrone(Drone drone) {
-        System.out.println("\n[MONITORAMENTO] Verificando Telemetria do Drone: " + drone.getModelo());
-        
+        if (drone == null) {
+            throw new IllegalArgumentException("Drone inválido");
+        }
+
+       // Implementação Futura
     }
 
-    private void registrarLog(String usuario, String acao, String detalhes) {
-        LogAuditoria log = new LogAuditoria(usuario, acao, detalhes);
-        this.logs.add(log);
-        System.out.println("[LOG] " + log.getTimestamp() + " - " + acao + ": " + detalhes);
+    // Getters
+    public List<Drone> getFrota() {
+        return List.copyOf(frota);
     }
-
-    // Getters 
-    public void adicionarDroneAFrota(Drone d) { 
-    	this.frota.add(d); 
+    public List<Missao> getMissoes() {
+        return List.copyOf(missoes);
     }
-    public List<LogAuditoria> getLogs() { 
-    	return logs; 
+    public List<LogAuditoria> getLogs() {
+        return List.copyOf(logs);
     }
-	public List<Drone> getFrota() {
-		return frota;
-	}	
 }

@@ -1,30 +1,97 @@
 package model;
 
-public class Coordenadas {
+import java.util.Objects;
+
+public final class Coordenadas {
 	
-	// Atributos Privados e Fixos
-    private double latitude;
-    private double longitude;
-    private double altitude;
+	// Constantes Para Cálculo
+    private static final double MIN_LAT = -90.0;
+    private static final double MAX_LAT = 90.0;
+    private static final double MIN_LON = -180.0;
+    private static final double MAX_LON = 180.0;
+    private static final double EPSILON = 1e-6;
+    private static final double EARTH_RADIUS = 6371000;
+    
+    // Atributos Privados
+    private final double latitude;
+    private final double longitude;
+    private final double altitude;
     
     // Construtor Público
     public Coordenadas(double latitude, double longitude, double altitude) {
-        validarLimites(latitude, longitude);
+        validar(latitude, longitude);
         this.latitude = latitude;
         this.longitude = longitude;
         this.altitude = altitude;
     }
     
-    // Validação das Coordenadas
-    private void validarLimites(double lat, double lon) {
-        if (lat < -90.0 || lat > 90.0) {
-            throw new IllegalArgumentException("Latitude fora dos limites (-90 a 90): " + lat);
+    // Validação de Latitude e Longitude
+    private void validar(double latitude, double longitude) {
+        if (latitude < MIN_LAT || latitude > MAX_LAT) {
+            throw new IllegalArgumentException("Latitude inválida: " + latitude);
         }
-        if (lon < -180.0 || lon > 180.0) {
-            throw new IllegalArgumentException("Longitude fora dos limites (-180 a 180): " + lon);
+        if (longitude < MIN_LON || longitude > MAX_LON) {
+            throw new IllegalArgumentException("Longitude inválida: " + longitude);
         }
     }
+    
+    // Calcula se Drones Estão no Raio Próximo do Local da Missão
+    public boolean isProximo(Coordenadas destino, double raioMetros) {
+        Objects.requireNonNull(destino, "Destino não pode ser nulo");
+        return calcularDistancia(destino) <= raioMetros;
+    }
+    
+    // Calcula a Distância (Considerada a Altitude)
+    public double calcularDistancia(Coordenadas destino) {
+        Objects.requireNonNull(destino, "Destino não pode ser nulo");
 
+        double lat1Rad = Math.toRadians(this.latitude);
+        double lat2Rad = Math.toRadians(destino.latitude);
+
+        double deltaLat = Math.toRadians(destino.latitude - this.latitude);
+        double deltaLon = Math.toRadians(destino.longitude - this.longitude);
+
+        double a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2)
+                + Math.cos(lat1Rad) * Math.cos(lat2Rad)
+                * Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        double distanciaSuperficie = EARTH_RADIUS * c;
+
+        double deltaAlt = destino.altitude - this.altitude;
+
+        return Math.sqrt(distanciaSuperficie * distanciaSuperficie + deltaAlt * deltaAlt);
+    }
+
+    // Cálculo de Distância 2D (Ignora a Altitude)
+    public double calcularDistancia2D(Coordenadas destino) {
+        Objects.requireNonNull(destino, "Destino não pode ser nulo");
+
+        double lat1Rad = Math.toRadians(this.latitude);
+        double lat2Rad = Math.toRadians(destino.latitude);
+
+        double deltaLat = Math.toRadians(destino.latitude - this.latitude);
+        double deltaLon = Math.toRadians(destino.longitude - this.longitude);
+
+        double a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2)
+                + Math.cos(lat1Rad) * Math.cos(lat2Rad)
+                * Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return EARTH_RADIUS * c;
+    }
+    
+    // Compara Se Uma Coordenada é Igual a Outra (Com Tolerância)
+    public boolean isIgual(Coordenadas outra) {
+        if (outra == null) return false;
+
+        return Math.abs(this.latitude - outra.latitude) < EPSILON &&
+               Math.abs(this.longitude - outra.longitude) < EPSILON &&
+               Math.abs(this.altitude - outra.altitude) < EPSILON;
+    }
+    
     // Getters
     public double getLatitude() { 
     	return latitude; 
@@ -35,39 +102,10 @@ public class Coordenadas {
     public double getAltitude() { 
     	return altitude; 
     }
-    
-    // Setters
-    public void setLatitude(double latitude) {
-        if (latitude < -90.0 || latitude > 90.0) {
-            throw new IllegalArgumentException("Latitude inválida: " + latitude);
-        }
-        this.latitude = latitude;
-    }
-
-    public void setLongitude(double longitude) {
-        if (longitude < -180.0 || longitude > 180.0) {
-            throw new IllegalArgumentException("Longitude inválida: " + longitude);
-        }
-        this.longitude = longitude;
-    }
-
-    public void setAltitude(double altitude) {
-        this.altitude = altitude;
-    }
-    
-    // Para Retorno dos Valores das Coordenadas
+ 
     @Override
     public String toString() {
-        return String.format("Lat: %.6f, Lon: %.6f, Alt: %.2fm", latitude, longitude, altitude);
-    }
-    
-    // Verifica se o Objeto Está Próximo do Raio da Missão
-    public boolean isProximo(Coordenadas destino, double raioToleranciaMetros) {
-        return calcularDistancia(destino) <= raioToleranciaMetros;
-    }
-
-    public double calcularDistancia(Coordenadas destino) {
-       // Método aqui
-        return 0.0; 
+        return String.format("Lat: %.6f, Lon: %.6f, Alt: %.2fm",
+                latitude, longitude, altitude);
     }
 }

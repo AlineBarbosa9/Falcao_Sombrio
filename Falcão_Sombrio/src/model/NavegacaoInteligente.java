@@ -1,25 +1,25 @@
 package model;
 
-import enums.StatusDrone;
-
 public class NavegacaoInteligente {
 
-    public void calcularRota(Coordenadas atual, Coordenadas destino) {
-        System.out.println("[IA] Rota calculada: (" + atual.getLatitude() + ") -> (" + destino.getLatitude() + ")");
+    public String calcularRota(Coordenadas atual, Coordenadas destino) {
+
+        if (atual == null || destino == null) {
+            throw new IllegalArgumentException("Coordenadas inválidas");
+        }
+
+        return "Rota calculada";
     }
 
-    public void detectarAmeaca(Drone drone) {
-        if (drone.getBateria() < 15.0) {
-            System.out.println("[IA-ALERTA] Bateria baixa!");
-            drone.setStatus(StatusDrone.ALERTA);
-        } else {
-            System.out.println("[IA] Sensores normais.");
-        }
+    public boolean detectarAmeaca(double bateria) {
+        return bateria < 15.0;
     }
 
     public void desviarObstaculo(Drone drone) {
-        System.out.println("[IA] Desviando de obstáculo...");
-        double altitudeAtual = drone.getLocalizacao().getAltitude();
-        drone.getLocalizacao().setAltitude(altitudeAtual + 10);
+
+        if (drone == null || drone.getLocalizacao() == null) {
+            throw new IllegalArgumentException("Drone inválido");
+        }
+
     }
 }

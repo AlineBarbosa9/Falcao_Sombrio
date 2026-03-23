@@ -1,32 +1,36 @@
 package model;
-
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 public class Telemetria {
 	
 	// Atributos Privados
-    private String id;
-    private UUID droneId;
-    private double latitude;
-    private double longitude;
-    private double altitude;
-    private double velocidade;
-    private LocalDateTime timestamp;
+    private final UUID id;
+    private final UUID droneId;
+    private final double latitude;
+    private final double longitude;
+    private final double altitude;
+    private final double velocidade;
+    private final Instant timestamp;
 
-    // Construtor 
-    public Telemetria(Drone drone, double velocidade) {
-        this.id = UUID.randomUUID().toString();
-        this.droneId = drone.getId();
-        this.latitude = drone.getLocalizacao().getLatitude();
-        this.longitude = drone.getLocalizacao().getLongitude();
-        this.altitude = drone.getLocalizacao().getAltitude();
+    // Construtor Público
+    public Telemetria(UUID droneId, double latitude, double longitude, double altitude,
+            double velocidade, String statusDrone, String origemDado, Instant timestamp){
+    	
+        if (droneId == null) throw new IllegalArgumentException("DroneId não pode ser nulo");
+        if (velocidade < 0) throw new IllegalArgumentException("Velocidade inválida");
+
+        this.id = UUID.randomUUID();
+        this.droneId = droneId;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.altitude = altitude;
         this.velocidade = velocidade;
-        this.timestamp = LocalDateTime.now();
+        this.timestamp = timestamp != null ? timestamp : Instant.now();
     }
-    
+
     // Getters
-	public String getId() {
+	public UUID getId() {
 		return id;
 	}
 	public UUID getDroneId() {
@@ -44,7 +48,13 @@ public class Telemetria {
 	public double getVelocidade() {
 		return velocidade;
 	}
-	public LocalDateTime getTimestamp() {
+	public Instant getTimestamp() {
 		return timestamp;
 	}
+	
+	@Override
+    public String toString() {
+        return String.format("Telemetria[DroneID=%s, Lat=%.6f, Lon=%.6f, Alt=%.2f, Vel=%.2f, TS=%s]",
+                droneId, latitude, longitude, altitude, velocidade, timestamp);
+    }
 }

@@ -1,56 +1,78 @@
 package model;
 
-import enums.StatusDrone;
+import java.util.UUID;
 
 public class SistemaComunicacao {
-    
+
 	// Atributos Privados
     private String protocolo;
     private boolean conexaoAtiva;
+    private int tentativasFalhas;
     
-    // Construtor
+    private static final int LIMITE_TENTATIVAS = 3;
+
     public SistemaComunicacao(String protocolo) {
-        this.protocolo = protocolo;
+        this.setProtocolo(protocolo);
         this.conexaoAtiva = true;
+        this.tentativasFalhas = 0;
     }
-    
-    public void enviarComando(Drone drone, String comando) {
+
+    public boolean enviarComandoSeguro(UUID droneId, String comando, String assinatura) {
+
+        if (!validarAssinatura(assinatura)) {
+            return false;
+        }
+
         if (!conexaoAtiva) {
-            System.err.println("[COM-ERRO] Falha: Sem sinal com o drone " + drone.getModelo());
-            return;
+            registrarFalha();
+            return false;
         }
 
-        System.out.println("[COM] Enviando: " + comando + " | Protocolo: " + protocolo);
-  
-        if (comando.equalsIgnoreCase("ABORTAR")) {
-            drone.setStatus(StatusDrone.RETORNANDO);
-            System.out.println("[SISTEMA] Comando de emergência: Drone retornando à base.");
-        }
+        tentativasFalhas = 0;
+        return true;
     }
-    
+
+    public boolean receberTelemetria(Telemetria t) {
+
+        if (!conexaoAtiva || t == null) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void registrarFalha() {
+        tentativasFalhas++;
+
+        if (tentativasFalhas >= LIMITE_TENTATIVAS) {
+            tentarReconexao();
+        }
+        
+        
+    }
+
     public void tentarReconexao() {
-        System.out.println("[COM] Tentando reconexão via protocolo secundário...");
-   
-        this.protocolo = "PROTOCOLO_RESERVA_SATELITAL";
+        this.setProtocolo("SAT_ENCRYPT_LNK");
         this.conexaoAtiva = true;
+        
+        this.tentativasFalhas = 0;
     }
 
-    public void receberTelemetria(Telemetria t) {
-        if (conexaoAtiva) {
-            System.out.println("--- Pacote de Telemetria Recebido ---");
-            System.out.println("Drone ID: " + t.getDroneId());
-            System.out.println("Posição: " + t.getLatitude() + ", " + t.getLongitude());
-            System.out.println("Velocidade: " + t.getVelocidade() + " km/h");
-            System.out.println("Timestamp: " + t.getTimestamp());
-            System.out.println("-------------------------------------");
-        }
-    }
- 
-    public boolean isConexaoAtiva() { 
-    	return conexaoAtiva; 
-    }
     
-    public void setConexaoAtiva(boolean conexaoAtiva) { 
-    	this.conexaoAtiva = conexaoAtiva; 
+    private boolean validarAssinatura(String assinatura) {
+        return assinatura != null && !assinatura.isBlank();
     }
+
+   
+    public boolean isConexaoAtiva() {
+        return conexaoAtiva;
+    }
+
+	public String getProtocolo() {
+		return protocolo;
+	}
+
+	public void setProtocolo(String protocolo) {
+		this.protocolo = protocolo;
+	}
 }
