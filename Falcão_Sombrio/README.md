@@ -6,7 +6,7 @@
 **Arquitetura de Software e Banco de Dados**
 
 
-**Alunas:** Aline Barbosa   RA: 10721348  /  Ilca Mária Luz  RA: 10444474
+**Alunas:** Aline Barbosa   RA: 10721348  /  Ilca Mária Luz  RA: 10444474  /  Sofia Castelli  RA: 10443550
 
 **Disciplina:** Projeto de Software
 
